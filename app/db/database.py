@@ -2,17 +2,18 @@ from sqlalchemy import create_engine
 from flask_sqlalchemy import SQLAlchemy
 
 from model import models
-from db import config
+# from db import config
 
 
 class Database:
 
     def __init__(self, app):
-        app.config['SQLALCHEMY_DATABASE_URI'] = config.database_uri
+        self.databse_uri = 'sqlite:///C://Users/hp/Desktop/PlagiarismChecker/app/db/plagiarism.db'
+        app.config['SQLALCHEMY_DATABASE_URI'] = self.databse_uri
         app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
         self.db = SQLAlchemy(app)
-        self.engine = create_engine(config.database_uri)
+        self.engine = create_engine(self.databse_uri)
         models.Base.metadata.create_all(self.engine)
 
     def insert_data_for_search(self, name, content):

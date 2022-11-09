@@ -11,7 +11,7 @@ from db import database
 from engine import engine
 from file_parser import file_parser
 
-app = Flask(__name__, template_folder='../templates', static_folder='../static')
+app = Flask(__name__,template_folder='../templates',static_folder='../static')
 
 app.config['JWT_SECRET_KEY'] = 'super-secret'
 app.config['JWT_TOKEN_LOCATION'] = ["cookies"]
@@ -57,6 +57,7 @@ def initialization():
     global eng
 
     postgres = database.Database(app)
+    postgres.db.create_all()
     pars = file_parser.Parser()
     eng = engine.Engine()
 
@@ -73,30 +74,31 @@ def is_english(s):
 @app.route('/get_results', methods=['POST'])
 @jwt_required()
 def get_results():
-    file = request.files['file']
-    number_of_results = request.form['number']
+    
+        file = request.files['file']
+        number_of_results = request.form['number']
 
-    bad_request(file, 'Missing file!')
-    bad_request(number_of_results, 'Missing number of results!')
+        bad_request(file, 'Missing file!')
+        bad_request(number_of_results, 'Missing number of results!')
 
-    number_of_rows = postgres.count_rows()
+        number_of_rows = postgres.count_rows()
 
-    if number_of_rows == 0:
-        return make_response(jsonify([]), 404)
+        if number_of_rows == 0:
+            return make_response(jsonify([]), 404)
 
-    text_to_check = pars.get_data(file)
+        text_to_check = pars.get_data(file)
 
-    if is_english(text_to_check):
-        all_data_from_db = postgres.get_all_data()
-        all_sentences = postgres.get_all_sentences(all_data_from_db)
+        if is_english(text_to_check):
+            all_data_from_db = postgres.get_all_data()
+            all_sentences = postgres.get_all_sentences(all_data_from_db)
 
-        ids, calculation_result = eng.start(all_sentences, [text_to_check], number_of_results)
-        prepared_results = postgres.result_to_dict(all_data_from_db)
-        result = eng.prepare_results(ids, prepared_results, calculation_result)
+            ids, calculation_result = eng.start(all_sentences, [text_to_check], number_of_results)
+            prepared_results = postgres.result_to_dict(all_data_from_db)
+            result = eng.prepare_results(ids, prepared_results, calculation_result)
 
-        return make_response(jsonify(result), 200)
+            return make_response(jsonify(result), 200)
 
-    return make_response('Check the file extension or data', 400)
+        return make_response('Check the file extension or data', 400)
 
 
 @app.route('/insert_data', methods=['POST'])
@@ -222,3 +224,10 @@ def user_page():
 @admin_only
 def admin_page():
     return render_template('admin.html')
+
+@app.route('/check/')
+def check():
+    return render_template('admin.html')
+
+# if __name__=="__main__":
+#     app.run(debug=True)

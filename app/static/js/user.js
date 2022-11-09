@@ -17,6 +17,7 @@ function logOut() {
 
 (() => {
     async function getResult(event) {
+        
         event.preventDefault();
 
         const fileInput = document.getElementById('fileUpload');
@@ -37,7 +38,7 @@ function logOut() {
         }).then(handleErrors)
 
         const result = await response.json();
-
+        console.log(result)
         const tbody = document.getElementById('resultsTableBody');
         tbody.innerHTML = '';
 
@@ -60,8 +61,8 @@ function logOut() {
         table.style['display'] = 'block';
     }
 
-    const button = document.querySelector('.submitBtn');
-    button.addEventListener('click', getResult);
+    const button = document.querySelector('#submitBtn');
+    button.addEventListener('submit', getResult);
 })();
 
 const rangeInputs = document.querySelectorAll('input[type="range"]')
@@ -99,7 +100,7 @@ document.getElementById('numberSensitivity').addEventListener('input', handleNum
 
 function handleErrors(response) {
     document.getElementById('validationMsg').style.display = 'block';
-
+    condsole.log(response)
     if (response.status === 400) {
         document.getElementById('validationMsg').style.color = 'red';
     } else if (response.ok) {
